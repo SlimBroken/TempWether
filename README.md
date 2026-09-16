@@ -26,6 +26,7 @@ npm run collect # Fetch all 14 locations and append a shared forecast scan
 
 ## What is included
 
+- A **Storm & wind explorer** at the top of Mediterranean: animated wind particles, static direction arrows, storm-outlook (clouds + precipitation), wind-speed and rain/snow layers; 168-hour play/pause timeline; ECMWF/GFS/ICON switching; zoom, drag-to-pan, Israel/region presets, and click-to-inspect wind, direction, gusts, precipitation, clouds and pressure. Keyboard-accessible location selection offers the same numeric details. Reduced-motion preferences disable automatic wind animation.
 - Seven-day forecasts for eight Israeli locations, plus Athens, Heraklion, Rhodes, Paphos, Larnaca and Nicosia.
 - ECMWF IFS 0.25°, NOAA GFS and DWD ICON comparison, with equal-weight hourly blending of available values.
 - Temperature, rainfall, wind, gusts and pressure; feels-like temperature, humidity and precipitation probability from Open-Meteo Best Match.
@@ -38,6 +39,8 @@ npm run collect # Fetch all 14 locations and append a shared forecast scan
 - Responsive layout, keyboard controls, visible focus, reduced-motion support and accessible chart/table descriptions.
 
 ## Data and methodology
+
+The animation panel fetches a separate **9 × 7 coarse display grid** spanning 20–38°E and 28–41°N on demand, for one selected model at a time. This is approximately 2° sampling, **not the native model resolution** and not suitable for resolving local storm cells or flash-flood hazards. Grid-cell selection is `nearest` to include marine areas. Values are bilinearly interpolated only where the required corners are available; missing data is never replaced by zero. Wind directions are converted to east/north vectors before interpolation, avoiding compass-angle wrap errors. Particles move in the forecast wind direction; their on-screen speed is illustrative, not a prediction of storm travel. Precipitation is the **preceding hour's** total (including snow water equivalent); clouds are forecast cloud cover, not satellite imagery. No storm tracks or lightning detections are inferred. Forecast-hour playback advances in discrete hours, not simulated weather between hours. Data is cached in memory for 30 minutes per model, with concurrent requests deduplicated. Graphics are not added to the scan archive; sample fields remain explicitly synthetic and separate from live fields. Model switching never falls back to a different model.
 
 All app dates and times use `Asia/Jerusalem`, including the regional view. API timestamps are Unix seconds, so comparisons remain aligned across timezones and daylight-saving changes. The app averages each weather variable independently across available values. Missing values never become zero. A provider failure does not discard other models.
 

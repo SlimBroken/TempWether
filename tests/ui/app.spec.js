@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {sampleData,LOCATIONS} from '../../src/weather.js';
+import {sampleField} from '../../src/weather-field.js';
 
 test.beforeEach(async({page})=>{
  await page.route('**/public/latest.json',r=>r.fulfill({status:404,body:'No saved forecast in this isolated test'}));
@@ -20,6 +21,12 @@ test('Unavailable providers, explicit sample preview, regional navigation and mo
  await page.locator('[data-metric="rain"]').click();
  await page.locator('[data-tab="mediterranean"]').click();
  await expect(page.locator('.region-map')).toBeVisible();
+ await expect(page.locator('#flow-play')).toBeEnabled();
+ await expect(page.locator('.explorer-badge')).toHaveText('SYNTHETIC PREVIEW');
+ await page.locator('#flow-motion').click();
+ await page.locator('#flow-hour').fill('72');
+ await expect(page.locator('#flow-hour')).toHaveValue('72');
+ await page.locator('#weather-explorer').screenshot({path:testInfo.outputPath('storm-explorer-desktop.png')});
  await expect(page.getByText('Named storm status not connected')).toBeVisible();
  await page.screenshot({path:testInfo.outputPath('mediterranean-desktop.png'),fullPage:true});
  await page.locator('[data-layer="gust"]').click();
@@ -57,6 +64,71 @@ test('Unavailable providers, explicit sample preview, regional navigation and mo
   await page.screenshot({path:testInfo.outputPath(`${tab}-mobile.png`),fullPage:true});
  }
  expect(errors).toEqual([]);
+});
+
+test('Animated map layers, playback, zoom, inspection and reduced motion',async({page},testInfo)=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.route('https://**/*',r=>r.abort());
+ await page.goto('/');await page.getByRole('button',{name:'Explore sample preview'}).click();
+ await page.locator('[data-tab="mediterranean"]').click();
+ await expect(page.locator('#flow-play')).toBeEnabled();
+ await expect(page.locator('#flow-motion')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#flow-location').selectOption('paphos');
+ const initial=await page.locator('#flow-values').textContent();
+ await page.locator('#flow-hour').fill('72');
+ expect(await page.locator('#flow-values').textContent()).not.toBe(initial);
+ await page.locator('#flow-model').selectOption('icon_global');
+ await expect(page.locator('#flow-time')).toContainText('ICON');
+ await page.locator('[data-flow-layer="wind"]').click();
+ await expect(page.locator('.flow-legend')).toContainText('Wind speed at 10 m');
+ await page.locator('#flow-israel').click();
+ await page.locator('#flow-plus').click();await page.locator('#flow-minus').click();
+ await page.locator('#flow-region').click();
+ await page.locator('.flow-base').click({position:{x:300,y:250}});
+ await expect(page.locator('#flow-location')).toHaveValue('custom');
+ await page.locator('#flow-play').click();
+ await expect.poll(async()=>Number(await page.locator('#flow-hour').inputValue())).toBeGreaterThan(72);
+ await page.getByRole('button',{name:'Pause forecast timeline'}).click();
+ await page.locator('#flow-hour').fill('167');await page.locator('#flow-play').click();
+ await expect.poll(async()=>Number(await page.locator('#flow-hour').inputValue())).toBeLessThan(167);
+ await page.getByRole('button',{name:'Pause forecast timeline'}).click();
+ await page.locator('#flow-now').click();await expect(page.locator('#flow-hour')).toHaveValue('0');
+ await page.locator('[data-flow-layer="storm"]').click();await page.locator('#flow-hour').fill('96');
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+ await page.locator('#weather-explorer').screenshot({path:testInfo.outputPath('storm-explorer-mobile.png')});
+ await page.locator('#flow-motion').click();await expect(page.locator('#flow-motion')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-tab="forecast"]').click();
+ expect(errors).toEqual([]);
+});
+
+test('Regional API grid is distinct from cities, switches model and preserves unavailable values',async({page})=>{
+ const fixture=sampleData();delete fixture.sample;
+ await page.route('**/public/latest.json',r=>r.fulfill({json:fixture}));
+ let requests=0;
+ await page.route('https://**/*',async route=>{
+  const u=new URL(route.request().url());
+  if(!u.hostname.endsWith('open-meteo.com'))return route.abort();
+  expect(u.searchParams.get('hourly')).toContain('wind_direction_10m');
+  expect(u.searchParams.get('cell_selection')).toBe('nearest');
+  requests++;
+  const model=u.searchParams.get('models');
+  if(model==='icon_global')return route.fulfill({status:503,json:{reason:'Test provider outage'}});
+  const data=sampleField(model);
+  const payload=data.cells.map(c=>({hourly:{time:data.times,wind_speed_10m:c.values.map(v=>Math.hypot(v[0],v[1])),wind_direction_10m:c.values.map(v=>(Math.atan2(-v[0],-v[1])*180/Math.PI+360)%360),precipitation:c.values.map(v=>v[2]),wind_gusts_10m:c.values.map(v=>v[3]),cloud_cover:c.values.map(()=>null),pressure_msl:c.values.map(v=>v[5])}}));
+  return route.fulfill({json:payload});
+ });
+ await page.goto('/');await expect(page.locator('[data-day]')).toHaveCount(7);
+ await page.locator('[data-tab="mediterranean"]').click();
+ await expect(page.locator('#flow-play')).toBeEnabled();
+ await expect(page.locator('.explorer-badge')).toContainText('MODEL FORECAST');
+ await expect(page.locator('#flow-values')).toContainText('—%');
+ await page.locator('#flow-model').selectOption('gfs_global');await expect(page.locator('#flow-time')).toContainText('GFS');
+ await page.locator('#flow-model').selectOption('icon_global');await expect(page.locator('.flow-status')).toContainText('Regional graphics unavailable');
+ await expect(page.locator('#flow-play')).toBeDisabled();await expect(page.locator('#flow-values')).not.toContainText('1019');
+ await page.locator('#flow-model').selectOption('ecmwf_ifs025');await expect(page.locator('#flow-time')).toContainText('ECMWF');
+ expect(requests).toBe(3); // The first model is reused from the in-memory cache.
 });
 
 test('Successful model responses persist real scans, export CSV, and show benchmark results',async({page})=>{

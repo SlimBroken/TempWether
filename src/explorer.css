@@ -1,0 +1,44 @@
+.weather-explorer{margin-bottom:30px;border-color:#344b58;background:#101e2b}
+.explorer-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:25px 26px 20px}
+.explorer-heading .eyebrow{color:#bddd98;font-size:10px;letter-spacing:2px}
+.explorer-heading h2{font-size:27px;margin-top:6px;letter-spacing:-.9px}
+.explorer-heading p{font-size:13px;color:var(--muted);margin-top:5px}
+.explorer-badge{font-size:10px;letter-spacing:1px;border:1px solid #446052;color:#cee9b4;border-radius:5px;padding:6px 9px}
+.explorer-toolbar{display:flex;gap:14px;align-items:center;padding:0 26px 20px;flex-wrap:wrap}
+.explorer-toolbar>.explorer-select{margin-left:auto}
+.explorer-select{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted)}
+.explorer-select select{border:1px solid #39505f;padding:9px 10px;border-radius:7px;background:#152736;color:var(--text);font-size:13px}
+.explorer-toolbar .button{font-size:12px;min-height:37px;padding:8px 10px}
+.flow-stage{position:relative;height:540px;overflow:hidden;background:#0d2232;border-top:1px solid #314554;border-bottom:1px solid #314554}
+.flow-stage canvas{position:absolute;width:100%;height:100%;inset:0;display:block}
+.flow-base{cursor:crosshair;touch-action:pan-y}
+.flow-base:active{cursor:grabbing}
+.flow-particles{pointer-events:none}
+.flow-map-title{position:absolute;left:22px;top:20px;pointer-events:none;background:#0b1c2be8;border:1px solid #344c59;border-radius:9px;padding:11px 14px;box-shadow:0 4px 20px #0003}
+.flow-map-title>span{display:block;color:#9cafbd;font-size:9px;letter-spacing:1.8px;margin-bottom:4px}
+.flow-map-title strong{font-size:13px;font-weight:500;color:#eff7fa}
+.flow-map-tools{position:absolute;right:17px;top:20px;display:grid;gap:5px}
+.flow-map-tools button{background:#0d1e2ce8;border:1px solid #3d5865;border-radius:7px;min-width:43px;min-height:37px;color:#e0f0ed;font-size:12px;padding:6px}
+.flow-map-tools button:nth-child(-n+2){font-size:21px;line-height:1}
+.flow-map-hint{position:absolute;bottom:13px;left:20px;color:#acbdc9;font-size:10px;background:#0c1d2bd9;padding:5px 9px;border-radius:5px;pointer-events:none}
+.flow-status{position:absolute;inset:40% 15% auto;padding:23px;background:#0d1d2ef2;border:1px solid #436174;border-radius:11px;text-align:center;font-size:13px;box-shadow:0 10px 50px #0005}
+.flow-status[hidden]{display:none}.flow-status button{display:block;margin:15px auto 0}
+.flow-legend{display:flex;gap:20px;align-items:center;padding:15px 25px;border-bottom:1px solid var(--line);font-size:10px;color:var(--muted)}
+.flow-legend>strong{color:#bfd0d9;font-weight:500;min-width:125px;font-size:11px}
+.flow-legend>div{flex:1;max-width:420px;min-width:150px}
+.flow-gradient{height:6px;background:linear-gradient(to right,#234156,#277db0,#2ebdc4,#6ccd92,#f3ca65,#f77661,#d16add);border-radius:8px}
+.flow-gradient.wind-gradient{background:linear-gradient(to right,#1e375a,#2d71a3,#2ab1a7,#bdcf6c,#f19d5b,#be65c8)}
+.flow-legend-labels{display:flex;justify-content:space-between;font-size:9px;margin-top:5px}
+.flow-legend>span{margin-left:auto;max-width:225px}
+.flow-timeline{display:flex;align-items:center;gap:20px;padding:18px 25px;background:#142331}
+.flow-timeline>div{flex:1;min-width:0}.flow-timeline label{display:flex;justify-content:space-between;color:var(--muted);gap:12px;font-size:11px}
+.flow-timeline label strong{font-weight:500;color:#e3eddf}.flow-timeline input{display:block;width:100%;accent-color:var(--green);margin:7px 0;min-height:25px;cursor:pointer}
+.flow-time-ends{display:flex;justify-content:space-between;gap:15px;font-size:10px;color:var(--muted)}
+.flow-inspector{padding:20px 25px;display:flex;gap:25px;align-items:center;border-top:1px solid var(--line)}
+.flow-inspector>div:first-child{min-width:210px}.flow-inspector #flow-coordinates{display:block;font-size:10px;color:#7f9bae;margin-top:8px}
+#flow-values{flex:1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+#flow-values span{display:block;font-size:10px;color:#9cafbe;margin-bottom:5px}#flow-values strong{font-size:13px;font-weight:500;white-space:nowrap;color:#dce8ed}
+.flow-disclaimer{padding:13px 25px 18px;color:#8da3b5;font-size:11px;line-height:1.7;border-top:1px solid #243947}.flow-disclaimer strong{color:#b2c5d1;font-weight:500}.flow-disclaimer>span{display:block;margin-top:6px;color:#abbcc9}
+@media(min-width:1600px){.flow-stage{height:620px}}
+@media(max-width:1200px){.flow-inspector{align-items:flex-start;flex-direction:column;gap:18px}#flow-values{width:100%}.flow-legend{flex-wrap:wrap;gap:12px}.flow-legend>span{margin:0;max-width:none}}
+@media(max-width:700px){.explorer-heading{padding:20px 18px 17px;align-items:flex-start;flex-direction:column;gap:13px}.explorer-heading h2{font-size:24px}.explorer-badge{font-size:9px}.explorer-toolbar{padding:0 18px 16px;gap:10px}.explorer-toolbar>.segmented{width:100%;display:flex}.explorer-toolbar>.segmented button{flex:1;padding:9px 7px;font-size:11px}.explorer-toolbar>.explorer-select{margin-left:0}.explorer-toolbar #flow-motion{margin-left:auto;font-size:10px}.explorer-toolbar #flow-motion .icon{width:14px}.flow-stage{height:420px}.flow-map-title{top:12px;left:10px;padding:9px;max-width:calc(100% - 73px)}.flow-map-title strong{font-size:10px}.flow-map-title>span{font-size:8px}.flow-map-tools{right:10px;top:12px}.flow-map-tools button{min-height:35px;min-width:40px;font-size:10px}.flow-map-hint{left:10px;font-size:9px;bottom:9px}.flow-status{inset:36% 10% auto;padding:18px}.flow-legend{padding:15px 18px;gap:9px}.flow-legend>strong{width:100%}.flow-legend>div{width:100%;max-width:none;flex:auto}.flow-legend>span{font-size:9px}.flow-timeline{padding:14px 14px;gap:10px;flex-wrap:wrap}.flow-timeline>div{order:-1;flex-basis:100%}.flow-timeline .button{font-size:12px;min-height:36px;padding:8px 13px}.flow-timeline #flow-now{margin-left:auto}.flow-inspector{padding:18px}.flow-inspector .explorer-select{font-size:11px}#flow-values{grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}#flow-values strong{font-size:13px}.flow-disclaimer{padding:15px 18px;font-size:10px}}

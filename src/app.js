@@ -1,6 +1,9 @@
 import {MODELS,LOCATIONS,TZ,finite,mean,max,min,localDate,formatTime,formatDay,condition,blend,daily,locationView,modelSignal,fetchForecasts,summarizeScan,mergeScans,fetchBenchmark,sampleData} from './weather.js';
 import {icon} from './icons.js';
 import {MAP_LAYERS,forecastDay,mapColor} from './map-data.js';
+import {mountWeatherExplorer} from './weather-explorer.js';
+
+let disposeExplorer=()=>{};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -33,7 +36,7 @@ function notices(){
  if(state.storageError)items.push(`<div class="notice warning">${icon('hard-drive')}<span>Your browser could not save this scan. Export history to keep a copy.</span></div>`);
  $('#notice').innerHTML=items.join(''); if($('#exit-sample'))$('#exit-sample').onclick=()=>{state.data=null;load(true);};
 }
-function render(){shell();notices();const v=view();
+function render(){disposeExplorer();disposeExplorer=()=>{};shell();notices();const v=view();
  if(state.tab==='history')renderHistory(); else if(state.tab==='accuracy')renderAccuracy(); else if(!v?.hours.length){renderEmpty();} else if(state.tab==='forecast')renderForecast(v);else renderRegional();
 }
 function switchTab(tab){state.tab=tab;history.replaceState(null,'','#'+tab);render();}
@@ -101,6 +104,7 @@ function officialStorms(){
  return `<section class="panel storm-panel"><div class="panel-top"><div><span class="eyebrow">OFFICIAL SOURCES</span><h2>One storm. One shared name.</h2></div>${icon('shield-check')}</div><p>Greece, Cyprus and Israel coordinate names for significant weather events. A named storm does not necessarily affect all three countries.</p>${events.length?events.map(e=>`<a class="storm-event" href="${esc(e.sourceUrl)}" target="_blank" rel="noopener noreferrer"><strong>${esc(e.name)}</strong><span>${esc(e.summary)}</span>${icon('arrow-up-right')}</a>`).join(''):`<div class="unverified">${icon('info')}<span><strong>Named storm status ${checked?'needs verification':'not connected'}</strong><br>No live official naming feed is connected. Check the agencies below for current warnings.</span></div>`}<div class="official-links"><a href="https://ims.gov.il/en" target="_blank" rel="noopener noreferrer"><span>Israel <strong>IMS</strong></span>${icon('arrow-up-right')}</a><a href="https://www.emy.gr/en/" target="_blank" rel="noopener noreferrer"><span>Greece <strong>HNMS</strong></span>${icon('arrow-up-right')}</a><a href="https://www.moa.gov.cy/moa/dm/dm.nsf/home_en/home_en?OpenForm" target="_blank" rel="noopener noreferrer"><span>Cyprus <strong>Met Service</strong></span>${icon('arrow-up-right')}</a></div><a class="text-link" href="https://ims.gov.il/en/node/1415" target="_blank" rel="noopener noreferrer">About the shared naming scheme ${icon('arrow-up-right')}</a></section>`;
 }
 function renderRegional(){
+ disposeExplorer();disposeExplorer=()=>{};
  const v=view(),date=v.days[state.regionalDay]?.date||v.days[0].date,layer=MAP_LAYERS[state.regionalMetric];
  const source=state.regionalModel==='blend'?'Combined forecast':MODELS.find(m=>m.id===state.regionalModel).name;
  const cities=state.mapScope==='israel'?LOCATIONS.filter(l=>l.country==='Israel').map(l=>l.id):['athens','crete','rhodes','paphos','larnaca','haifa','tel-aviv','eilat'];
@@ -116,6 +120,8 @@ function renderRegional(){
  <div class="region-sidebar">${modelComparison(state.location,date,true)}</div></div>
  <section class="panel regional-table"><div class="panel-top"><div><h2>Across the ${state.mapScope==='israel'?'country':'region'}</h2><p>${formatDay(date,{weekday:'long',day:'numeric',month:'short'})} · ${source}</p></div><span class="tag">Model signals, not official warnings</span></div><div class="table-scroll"><table><thead><tr><th>Location</th><th>High / low</th><th>Rainfall</th><th>Peak gusts</th><th>Models at watch level</th><th>${source} signal</th></tr></thead><tbody>${signals.map(({l,d,s,perModel})=>`<tr><td><button class="place-button" data-place="${l.id}">${esc(l.name)} ${icon('arrow-up-right')}</button><small>${l.country}</small></td><td>${num(d?.high,1)}° / ${num(d?.low,1)}°</td><td>${num(d?.rain,1)} <small>mm</small></td><td>${num(d?.gust)} <small>km/h</small></td><td>${perModel.filter(m=>['watch','high'].includes(modelSignal(m.day).level)).length} / ${perModel.filter(m=>modelSignal(m.day).level!=='unknown').length}</td><td><span class="signal ${s.level}">${s.label}</span></td></tr>`).join('')}</tbody></table></div><div class="panel-note">${icon('info')} Watch: ≥15 mm/day or ≥60 km/h gusts. Strong: ≥40 mm/day or ≥80 km/h. These screening thresholds are not official warning criteria; local flooding can occur below them.</div></section>
  <div class="regional-official">${officialStorms()}</div>`;
+ $('#content').insertAdjacentHTML('afterbegin','<div id="weather-explorer"></div>');
+ disposeExplorer=mountWeatherExplorer($('#weather-explorer'),{geo:state.geo,sample:!!state.data.sample});
  document.querySelectorAll('[data-layer]').forEach(b=>b.onclick=()=>{state.regionalMetric=b.dataset.layer;renderRegional();});
  document.querySelectorAll('[data-map-model]').forEach(b=>b.onclick=()=>{state.regionalModel=b.dataset.mapModel;renderRegional();});
  document.querySelectorAll('[data-scope]').forEach(b=>b.onclick=()=>{state.mapScope=b.dataset.scope;renderRegional();});
