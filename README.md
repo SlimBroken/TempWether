@@ -4,6 +4,10 @@ An Israel-first weather desk with a wider view of the eastern Mediterranean.
 
 **Forecast · Mediterranean watch · Scan history · Accuracy lab**
 
+![TempWether desktop interface with explicitly labelled synthetic preview data](docs/preview.png)
+
+The screenshot is an interface preview. Actual forecasts load from Open-Meteo.
+
 ## Run
 
 Requires Node.js 22 or newer. There are no dependencies to install.
@@ -46,7 +50,7 @@ The regional screen marks a point as worth watching at ≥15 mm/day or ≥60 km/
 
 `.github/workflows/weather.yml` collects forecasts every six hours, on pushes to `main`, and on manual dispatch. It validates calculations, archives `public/latest.json` and daily summaries in `public/history.json`, commits successful scans, and uploads a deployable `tempwether-site` artifact. It retains 240 scans (about 60 days at four scans a day). GitHub scheduled runs can be delayed, and inactive public repositories can have scheduled workflows disabled by GitHub. This is not a real-time alerting system.
 
-The workflow needs GitHub Actions enabled and a repository policy allowing `contents: write`; no weather API key is needed for the non-commercial Open-Meteo service. A failed collection preserves the existing archive and makes the workflow visibly fail after uploading the build. Local browsing also saves scans in this browser. Clearing site storage removes local-only history; CSV export keeps a copy.
+The workflow needs GitHub Actions enabled and a repository policy allowing `contents: write`; no weather API key is needed for the non-commercial Open-Meteo service. A failed collection preserves the existing archive and makes the workflow visibly fail after uploading the build. Local browsing saves the most recent 24 scans on this device to stay within browser storage limits; the shared repository archive retains 240. Clearing site storage removes local-only history; CSV export keeps a copy.
 
 ## Official named storms
 

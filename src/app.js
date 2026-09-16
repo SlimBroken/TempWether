@@ -11,7 +11,7 @@ const location=()=>LOCATIONS.find(l=>l.id===state.location);
 const view=()=>state.data?.locations[state.location]?locationView(state.data.locations[state.location]):null;
 const timeStamp=iso=>iso?new Intl.DateTimeFormat('en-GB',{timeZone:TZ,day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(iso)):'Not available';
 const age=()=>state.data?Math.max(0,(Date.now()-Date.parse(state.data.fetchedAt))/3600000):0;
-const stale=()=>age()>6;
+const stale=()=>age()>6||(state.data&&localDate(Date.parse(state.data.fetchedAt)/1000)!==localDate(Date.now()/1000));
 const dayLabel=d=>d===localDate(Date.now()/1000)?'Today':formatDay(d);
 
 function nav(){return ['forecast','mediterranean','history','accuracy'].map((t,i)=>`<button class="nav-item ${state.tab===t?'active':''}" data-tab="${t}" aria-label="${['Forecast','Mediterranean','Scan history','Accuracy lab'][i]}" ${state.tab===t?'aria-current="page"':''}>${icon(['layout-dashboard','radar','history','chart-no-axes-combined'][i])}<span>${['Forecast','Mediterranean','Scan history','Accuracy lab'][i]}</span></button>`).join('');}
@@ -110,7 +110,7 @@ function renderAccuracy(){
 function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 function acceptData(data,persist=true){
  state.data=data;
- if(persist&&!data.sample){state.history=mergeScans([summarizeScan(data)],state.history);state.storageError=!write('tw-history',state.history);write('tw-cache',data);}
+ if(persist&&!data.sample){state.history=mergeScans([summarizeScan(data)],state.history);state.storageError=!write('tw-history',state.history.slice(0,24));write('tw-cache',data);}
 }
 async function load(force=false){
  if(state.loading&&state.data)return;
