@@ -29,8 +29,9 @@ npm run collect # Fetch all 14 locations and append a shared forecast scan
 - Seven-day forecasts for eight Israeli locations, plus Athens, Heraklion, Rhodes, Paphos, Larnaca and Nicosia.
 - ECMWF IFS 0.25°, NOAA GFS and DWD ICON comparison, with equal-weight hourly blending of available values.
 - Temperature, rainfall, wind, gusts and pressure; feels-like temperature, humidity and precipitation probability from Open-Meteo Best Match.
+- Model-by-model daily cards with exact high/low temperature, rainfall and peak gusts, and shortcuts to each model’s map.
 - Model spread, per-day charts, three-hourly tables and explicit missing-data states.
-- A geographic Mediterranean watch map with a seven-day timeline and rain/gust layers. Point forecasts and thresholds are **not storm tracks or official warnings**.
+- An interactive forecast map with Mediterranean and Israel views, a seven-day timeline, individual ECMWF/GFS/ICON or combined forecasts, and daily high temperature / rainfall / gust layers. Select a city to compare all models in place. Colour legends follow the chosen variable. An unavailable selected model is never silently replaced with the blend. Point forecasts and thresholds are **not radar overlays, storm tracks or official warnings**.
 - Shared storm-naming context and direct links to IMS, HNMS and the Cyprus Department of Meteorology.
 - Local scan persistence, shared repository history, forecast revision charts and CSV export.
 - An on-demand historical temperature benchmark for 1-, 3- and 7-day lead times, including MAE, bias and RMSE on matched timestamps.
